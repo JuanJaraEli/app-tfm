@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <!-- La meta viewport asegura que se escale correctamente en móviles -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APP TFM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Evita scroll */
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .gradient-background {
+      background: linear-gradient(
+        180deg,
+        rgba(255,208,229,1) 0%,
+        rgba(255,232,242,1) 36%,
+        rgba(255,255,255,1) 100%
+      );
+    }
+
+    /* Contenedor central para imagen, pregunta y botones */
+    .center-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      padding: 0 20px; /* Margen horizontal para pantallas muy anchas o móviles */
+    }
+
+    /* La imagen se limita a un máximo de 300px para evitar que se agrande demasiado */
+    #imageDisplay {
+      width: 80%;
+      max-width: 300px;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    /* El título se centra */
+    #valentineQuestion {
+      text-align: center;
+    }
+
+    /* Contenedor de botones */
+    #responseButtons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px; /* Separación en dispositivos más grandes */
+      margin-top: 20px;
+    }
+
+    /* Estilos de los botones: se adaptan al contenido horizontalmente */
+    #yesButton,
+    #noButton {
+      font-size: 1.2rem;
+      padding: 0.5rem 1rem;
+      min-width: 6rem;
+      width: auto;
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* Botón "No": altura fija para que solo se expanda horizontalmente, y se evita el salto de línea */
+    #noButton {
+      height: 48px;
+      line-height: 48px;
+      white-space: nowrap;
+      transition: left 1s ease, top 1s ease;
+    }
+
+    /* Adaptación responsiva para pantallas pequeñas (por ejemplo, smartphones) */
+    @media (max-width: 500px) {
+      #responseButtons {
+        flex-direction: column; /* Apila los botones verticalmente */
+        gap: 10px; /* Ajusta el espacio entre ellos */
+      }
+    }
+
+    /* Otros ajustes responsivos (por ejemplo, tamaño de fuente del título) */
+    @media (max-width: 600px) {
+      #valentineQuestion {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body class="gradient-background">
+  <div class="center-container">
+    <img
+      id="imageDisplay"
+      src="./images/image1.gif"
+      alt="Cute kitten with flowers"
+      class="rounded-md"
+    />
+    <h2 id="valentineQuestion" class="text-4xl font-bold italic text-[#bd1e59] my-4">
+      Puedo ser tu valentín?
+    </h2>
+    <div id="responseButtons">
+      <button
+        id="yesButton"
+        class="inline-flex items-center justify-center rounded-md font-medium disabled:pointer-events-none disabled:opacity-50 hover:bg-green-400 bg-green-500 text-white"
+      >
+        Chi
+      </button>
+      <button
+        id="noButton"
+        class="inline-flex items-center justify-center rounded-md font-medium hover:bg-red-700 bg-red-500 text-white"
+      >
+        No :(
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    import confetti from "https://cdn.skypack.dev/canvas-confetti";
+
+    const yesButton = document.getElementById("yesButton");
+    let noButton = document.getElementById("noButton");
+    const imageDisplay = document.getElementById("imageDisplay");
+    const valentineQuestion = document.getElementById("valentineQuestion");
+    const responseButtons = document.getElementById("responseButtons");
+
+    let noClickCount = 0;
+    let buttonHeight = 48;
+    let buttonWidth = 100;
+    let fontSize = 20;
+    let escapeMode = false;
+
+    const imagePaths = [
+      "./images/image1.gif",
+      "./images/image2.gif",
+      "./images/image3.gif",
+      "./images/image4.gif",
+      "./images/image5.gif",
+      "./images/image6.gif",
+      "./images/image7.gif",
+    ];
+
+    noButton.addEventListener("click", function () {
+      if (noClickCount < 5) {
+        noClickCount++;
+        imageDisplay.src = imagePaths[noClickCount];
+
+        // Aumenta progresivamente el tamaño del botón "Sí"
+        buttonHeight += 20;
+        buttonWidth += 20;
+        fontSize += 5;
+        yesButton.style.height = buttonHeight + "px";
+        yesButton.style.width = buttonWidth + "px";
+        yesButton.style.fontSize = fontSize + "px";
+
+        // Actualizar el texto del botón "No"
+        const texts = [
+          "No",
+          "Segura?",
+          "Porfa bebeeee :(",
+          "No me hagas esto :(",
+          "Me rompes el corazoncito",
+          "Voy a llorar....",
+        ];
+        noButton.textContent = texts[noClickCount];
+      }
+
+      // Al llegar al quinto clic se activa el escape mode
+      if (noClickCount === 5) {
+        escapeMode = true;
+        // Se extrae la posición actual del botón "No"
+        const noRect = noButton.getBoundingClientRect();
+        // Se mueve el botón fuera del contenedor para que su ancho no esté restringido
+        document.body.appendChild(noButton);
+        noButton.style.position = "absolute";
+        noButton.style.left = noRect.left + "px";
+        noButton.style.top = noRect.top + "px";
+        moveNoButtonSafely();
+      }
+    });
+
+    // Función para reubicar el botón "No" aleatoriamente dentro del viewport
+    function moveNoButtonSafely() {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const noButtonRect = noButton.getBoundingClientRect();
+
+      const padding = 20;
+      const maxX = viewportWidth - noButtonRect.width - padding;
+      const maxY = viewportHeight - noButtonRect.height - padding;
+
+      const randomX = padding + Math.random() * (maxX - padding);
+      const randomY = padding + Math.random() * (maxY - padding);
+
+      noButton.style.left = randomX + "px";
+      noButton.style.top = randomY + "px";
+    }
+
+    noButton.addEventListener("mouseover", function () {
+      if (escapeMode) {
+        moveNoButtonSafely();
+      }
+    });
+    noButton.addEventListener("touchstart", function () {
+      if (escapeMode) {
+        moveNoButtonSafely();
+      }
+    });
+
+    yesButton.addEventListener("click", () => {
+      imageDisplay.src = "./images/image7.gif";
+      // Se inyecta el mensaje final usando clases responsivas para la separación:
+      // En móviles se usará un gap de 10px y en pantallas mayores 20px.
+      valentineQuestion.innerHTML = `
+        <div class="flex flex-col text-center gap-[10px] sm:gap-[20px]">
+          <div>SIIIIIII :3</div>
+          <div>Entonces, te espero el próximo viernes, 14 de febrero ❤️</div>
+          <a href="https://maps.apple.com/?address=Madrid,%20Espa%C3%B1a&auid=8985060030884508272&ll=40.411199,-3.708440&lsp=9902&q=La%20Latina&t=r" target="_blank" class="underline">Metro La Latina</a>
+          <div>20:15 hs</div>
+        </div>
+      `;
+      // Oculta el contenedor de botones y el botón "No"
+      responseButtons.style.display = "none";
+      noButton.style.display = "none";
+      confetti();
+    });
+  </script>
+</body>
+</html>
