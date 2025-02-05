@@ -99,6 +99,20 @@
       #valentineQuestion {
         font-size: 2rem;
       }
+
+      /* Para pantallas grandes, sin scroll */
+    html, body {
+      overflow: hidden;
+    }
+
+    /* En dispositivos móviles (ancho menor o igual a 640px) se activa el scroll */
+    @media (max-width: 640px) {
+      html, body {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+
     }
   </style>
 </head>
