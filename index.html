@@ -7,44 +7,49 @@
   <title>Valentines Day</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* Quitamos márgenes y padding, y forzamos que html y body ocupen toda la pantalla */
     html,
     body {
       margin: 0;
       padding: 0;
-      /* Inicialmente se evita el scroll en escritorio */
-      overflow: hidden;
+      overflow: hidden; /* Se actualizará en móviles o al mostrar contenido final */
       width: 100vw;
       height: 100vh;
+    }
+    
+    /* Contenedor principal que envuelve todo el contenido.
+       Se usa position: relative para que los elementos con position: absolute
+       se ubiquen dentro de él. */
+    #container {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-    }
-    .gradient-background {
       background: linear-gradient(
         180deg,
         rgba(255,208,229,1) 0%,
         rgba(255,232,242,1) 36%,
         rgba(255,255,255,1) 100%
       );
-    }
-    /* Contenedor central para imagen, pregunta y botones */
-    .center-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
       padding: 0 20px;
     }
-    /* Imagen con tamaño máximo en escritorio */
+    
+    /* Imagen principal */
     #imageDisplay {
       width: 80%;
       max-width: 300px;
       height: auto;
       border-radius: 10px;
     }
+    
+    /* Título */
     #valentineQuestion {
       text-align: center;
     }
+    
     /* Contenedor de botones */
     #responseButtons {
       display: flex;
@@ -53,6 +58,7 @@
       gap: 20px;
       margin-top: 20px;
     }
+    
     /* Estilos de los botones */
     #yesButton,
     #noButton {
@@ -62,7 +68,8 @@
       width: auto;
       transition: all 0.3s ease-in-out;
     }
-    /* Botón "No": altura fija, sin wrapping, y transición más lenta para moverse */
+    
+    /* Botón "No": altura fija, sin wrapping y con transición más lenta para moverlo */
     #noButton {
       height: 48px;
       line-height: 48px;
@@ -70,22 +77,24 @@
       transition: left 1.5s ease, top 1.5s ease;
       z-index: 1000;
     }
-    /* Ajustes responsivos para dispositivos pequeños */
+    
+    /* Responsividad para pantallas pequeñas */
     @media (max-width: 640px) {
+      /* Permite scroll para ver todo el contenido en móviles */
       html, body {
-        /* Permite el scroll en móviles para ver todo el contenido */
         overflow: auto;
       }
-      /* Reducir el tamaño máximo de la imagen en móviles */
+      /* Reduce el tamaño máximo de la imagen en móviles */
       #imageDisplay {
         max-width: 200px;
       }
-      /* Apilar los botones verticalmente para que no se recorten */
+      /* Apila los botones verticalmente */
       #responseButtons {
         flex-direction: column;
         gap: 10px;
       }
     }
+    
     @media (max-width: 600px) {
       #valentineQuestion {
         font-size: 2rem;
@@ -93,8 +102,9 @@
     }
   </style>
 </head>
-<body class="gradient-background">
-  <div class="center-container">
+<body>
+  <!-- Contenedor principal -->
+  <div id="container">
     <img
       id="imageDisplay"
       src="./images/image1.gif"
@@ -119,7 +129,7 @@
       </button>
     </div>
   </div>
-
+  
   <script type="module">
     import confetti from "https://cdn.skypack.dev/canvas-confetti";
 
@@ -128,6 +138,7 @@
     const imageDisplay = document.getElementById("imageDisplay");
     const valentineQuestion = document.getElementById("valentineQuestion");
     const responseButtons = document.getElementById("responseButtons");
+    const container = document.getElementById("container");
 
     let noClickCount = 0;
     let buttonHeight = 48;
@@ -168,28 +179,34 @@
         ];
         noButton.textContent = texts[noClickCount];
       }
-      // Cuando se llega al quinto clic, se activa el modo "escape"
+
+      // Cuando se llega al quinto clic, activa el modo "escape"
       if (noClickCount === 5) {
         escapeMode = true;
+        // Obtenemos la posición actual del botón "No" relativa al contenedor
         const noRect = noButton.getBoundingClientRect();
-        // Cambiamos a posición FIXED para que se posicione en relación al viewport
-        document.body.appendChild(noButton);
-        noButton.style.position = "fixed";
-        noButton.style.left = noRect.left + "px";
-        noButton.style.top = noRect.top + "px";
+        const containerRect = container.getBoundingClientRect();
+        // Movemos el botón "No" al contenedor para que se posicione de forma absoluta
+        container.appendChild(noButton);
+        noButton.style.position = "absolute";
+        noButton.style.left = (noRect.left - containerRect.left) + "px";
+        noButton.style.top = (noRect.top - containerRect.top) + "px";
         moveNoButtonSafely();
       }
     });
 
+    // Función para reposicionar el botón "No" dentro del contenedor
     function moveNoButtonSafely() {
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+      const containerRect = container.getBoundingClientRect();
       const noButtonRect = noButton.getBoundingClientRect();
+
       const padding = 20;
-      const maxX = viewportWidth - noButtonRect.width - padding;
-      const maxY = viewportHeight - noButtonRect.height - padding;
+      // Calculamos el ancho y alto máximo que puede usar dentro del contenedor
+      const maxX = containerRect.width - noButtonRect.width - padding;
+      const maxY = containerRect.height - noButtonRect.height - padding;
       const randomX = padding + Math.random() * (maxX - padding);
       const randomY = padding + Math.random() * (maxY - padding);
+
       noButton.style.left = randomX + "px";
       noButton.style.top = randomY + "px";
     }
@@ -212,15 +229,15 @@
 
     yesButton.addEventListener("click", () => {
       imageDisplay.src = "./images/image7.gif";
-      // Permite que el contenido final se expanda y se vea completo
-      document.body.style.overflow = "auto";
-      document.body.style.height = "auto";
-      document.body.style.display = "block";
+      // Permite que el contenido final se expanda y sea scrollable
+      container.style.overflow = "auto";
+      container.style.height = "auto";
+      // Inyecta el mensaje final
       valentineQuestion.innerHTML = `
         <div class="flex flex-col text-center gap-[10px] sm:gap-[20px]">
           <div>SIIIIIII :3</div>
           <div>Entonces, te espero el próximo viernes, 14 de febrero ❤️</div>
-          <a href="https://maps.apple.com/?q=Metro+La+Latina" target="_blank" class="underline">Metro La Latina</a>
+          <a href="https://maps.apple.com/?address=Madrid,%20Espa%C3%B1a&auid=8985060030884508272&ll=40.411199,-3.708440&lsp=9902&q=La%20Latina&t=r" target="_blank" class="underline">Metro La Latina</a>
           <div>20:15 hs</div>
         </div>
       `;
