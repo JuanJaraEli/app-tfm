@@ -11,7 +11,7 @@
     body {
       margin: 0;
       padding: 0;
-      /* Inicialmente evitamos scroll horizontal y vertical */
+      /* Para pantallas grandes se evita el scroll, pero se activará en móviles al aplicar media query o al mostrar el mensaje final */
       overflow: hidden;
       width: 100vw;
       height: 100vh;
@@ -38,7 +38,7 @@
       padding: 0 20px;
     }
 
-    /* La imagen se limita a un máximo de 300px para evitar que se agrande demasiado */
+    /* La imagen se limita a un máximo de 300px en pantallas grandes */
     #imageDisplay {
       width: 80%;
       max-width: 300px;
@@ -70,7 +70,7 @@
       transition: all 0.3s ease-in-out;
     }
 
-    /* Botón "No": altura fija para que solo se expanda horizontalmente, evita salto de línea y se mueve más despacio */
+    /* Botón "No": altura fija para que solo se expanda horizontalmente, sin wrapping y con transición más lenta */
     #noButton {
       height: 48px;
       line-height: 48px;
@@ -79,14 +79,24 @@
       z-index: 1000;
     }
 
-    /* Para pantallas pequeñas, se apilan los botones verticalmente */
+    /* Ajustes responsivos generales para dispositivos pequeños */
     @media (max-width: 640px) {
+      /* Permitir scroll en móviles para ver todo el contenido */
+      html, body {
+        overflow: auto;
+      }
+      /* Reducir el tamaño máximo de la imagen para que se ajuste mejor en pantallas pequeñas */
+      #imageDisplay {
+        max-width: 200px;
+      }
+      /* Apilar los botones verticalmente */
       #responseButtons {
         flex-direction: column;
         gap: 10px;
       }
     }
 
+    /* Ajuste adicional para el título en pantallas muy pequeñas */
     @media (max-width: 600px) {
       #valentineQuestion {
         font-size: 2rem;
@@ -151,7 +161,7 @@
         noClickCount++;
         imageDisplay.src = imagePaths[noClickCount];
 
-        // Aumenta progresivamente el tamaño del botón "Sí"
+        // Incrementa progresivamente el tamaño del botón "Sí"
         buttonHeight += 20;
         buttonWidth += 20;
         fontSize += 5;
@@ -159,7 +169,7 @@
         yesButton.style.width = buttonWidth + "px";
         yesButton.style.fontSize = fontSize + "px";
 
-        // Actualizar el texto del botón "No"
+        // Actualiza el texto del botón "No"
         const texts = [
           "No",
           "Segura?",
@@ -171,11 +181,11 @@
         noButton.textContent = texts[noClickCount];
       }
 
-      // Al llegar al quinto clic se activa el escape mode
+      // Al llegar al quinto clic, activa el modo "escape"
       if (noClickCount === 5) {
         escapeMode = true;
         const noRect = noButton.getBoundingClientRect();
-        // Saca el botón del contenedor para que no esté limitado en ancho
+        // Mueve el botón fuera del contenedor para que no esté limitado en ancho
         document.body.appendChild(noButton);
         noButton.style.position = "absolute";
         noButton.style.left = noRect.left + "px";
@@ -184,7 +194,7 @@
       }
     });
 
-    // Función para reubicar el botón "No" aleatoriamente dentro del viewport
+    // Función para reposicionar el botón "No" aleatoriamente dentro del viewport
     function moveNoButtonSafely() {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
@@ -221,9 +231,9 @@
 
     yesButton.addEventListener("click", () => {
       imageDisplay.src = "./images/image7.gif";
-      // Permite scroll para ver todo el contenido final
+      // Permite el scroll para ver todo el contenido final
       document.body.style.overflow = "auto";
-      // Inyecta el mensaje final (ajusta el gap si es necesario)
+      // Inyecta el mensaje final (ajusta el gap responsivamente)
       valentineQuestion.innerHTML = `
         <div class="flex flex-col text-center gap-[10px] sm:gap-[20px]">
           <div>SIIIIIII :3</div>
