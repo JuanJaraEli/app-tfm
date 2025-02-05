@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <!-- La meta viewport asegura que se escale correctamente en móviles -->
+  <!-- Meta viewport para escalar correctamente en dispositivos móviles -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Valentines Day</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -11,7 +11,7 @@
     body {
       margin: 0;
       padding: 0;
-      /* Para pantallas grandes se evita el scroll, pero se activará en móviles al aplicar media query o al mostrar el mensaje final */
+      /* Inicialmente se evita el scroll en escritorio */
       overflow: hidden;
       width: 100vw;
       height: 100vh;
@@ -19,7 +19,6 @@
       justify-content: center;
       align-items: center;
     }
-
     .gradient-background {
       background: linear-gradient(
         180deg,
@@ -28,7 +27,6 @@
         rgba(255,255,255,1) 100%
       );
     }
-
     /* Contenedor central para imagen, pregunta y botones */
     .center-container {
       display: flex;
@@ -37,20 +35,16 @@
       width: 100%;
       padding: 0 20px;
     }
-
-    /* La imagen se limita a un máximo de 300px en pantallas grandes */
+    /* Imagen con tamaño máximo en escritorio */
     #imageDisplay {
       width: 80%;
       max-width: 300px;
       height: auto;
       border-radius: 10px;
     }
-
-    /* El título se centra */
     #valentineQuestion {
       text-align: center;
     }
-
     /* Contenedor de botones */
     #responseButtons {
       display: flex;
@@ -59,7 +53,6 @@
       gap: 20px;
       margin-top: 20px;
     }
-
     /* Estilos de los botones */
     #yesButton,
     #noButton {
@@ -69,8 +62,7 @@
       width: auto;
       transition: all 0.3s ease-in-out;
     }
-
-    /* Botón "No": altura fija para que solo se expanda horizontalmente, sin wrapping y con transición más lenta */
+    /* Botón "No": altura fija, sin wrapping, y transición más lenta para moverse */
     #noButton {
       height: 48px;
       line-height: 48px;
@@ -78,25 +70,22 @@
       transition: left 1.5s ease, top 1.5s ease;
       z-index: 1000;
     }
-
-    /* Ajustes responsivos generales para dispositivos pequeños */
+    /* Ajustes responsivos para dispositivos pequeños */
     @media (max-width: 640px) {
-      /* Permitir scroll en móviles para ver todo el contenido */
       html, body {
+        /* Permite el scroll en móviles para ver todo el contenido */
         overflow: auto;
       }
-      /* Reducir el tamaño máximo de la imagen para que se ajuste mejor en pantallas pequeñas */
+      /* Reducir el tamaño máximo de la imagen en móviles */
       #imageDisplay {
         max-width: 200px;
       }
-      /* Apilar los botones verticalmente */
+      /* Apilar los botones verticalmente para que no se recorten */
       #responseButtons {
         flex-direction: column;
         gap: 10px;
       }
     }
-
-    /* Ajuste adicional para el título en pantallas muy pequeñas */
     @media (max-width: 600px) {
       #valentineQuestion {
         font-size: 2rem;
@@ -169,7 +158,6 @@
         yesButton.style.width = buttonWidth + "px";
         yesButton.style.fontSize = fontSize + "px";
 
-        // Actualiza el texto del botón "No"
         const texts = [
           "No",
           "Segura?",
@@ -180,33 +168,28 @@
         ];
         noButton.textContent = texts[noClickCount];
       }
-
-      // Al llegar al quinto clic, activa el modo "escape"
+      // Cuando se llega al quinto clic, se activa el modo "escape"
       if (noClickCount === 5) {
         escapeMode = true;
         const noRect = noButton.getBoundingClientRect();
-        // Mueve el botón fuera del contenedor para que no esté limitado en ancho
+        // Cambiamos a posición FIXED para que se posicione en relación al viewport
         document.body.appendChild(noButton);
-        noButton.style.position = "absolute";
+        noButton.style.position = "fixed";
         noButton.style.left = noRect.left + "px";
         noButton.style.top = noRect.top + "px";
         moveNoButtonSafely();
       }
     });
 
-    // Función para reposicionar el botón "No" aleatoriamente dentro del viewport
     function moveNoButtonSafely() {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       const noButtonRect = noButton.getBoundingClientRect();
-
       const padding = 20;
       const maxX = viewportWidth - noButtonRect.width - padding;
       const maxY = viewportHeight - noButtonRect.height - padding;
-
       const randomX = padding + Math.random() * (maxX - padding);
       const randomY = padding + Math.random() * (maxY - padding);
-
       noButton.style.left = randomX + "px";
       noButton.style.top = randomY + "px";
     }
@@ -221,8 +204,6 @@
         moveNoButtonSafely();
       }
     });
-
-    // Reubica el botón "No" si se cambia el tamaño de la ventana
     window.addEventListener("resize", () => {
       if (escapeMode) {
         moveNoButtonSafely();
@@ -231,9 +212,10 @@
 
     yesButton.addEventListener("click", () => {
       imageDisplay.src = "./images/image7.gif";
-      // Permite el scroll para ver todo el contenido final
+      // Permite que el contenido final se expanda y se vea completo
       document.body.style.overflow = "auto";
-      // Inyecta el mensaje final (ajusta el gap responsivamente)
+      document.body.style.height = "auto";
+      document.body.style.display = "block";
       valentineQuestion.innerHTML = `
         <div class="flex flex-col text-center gap-[10px] sm:gap-[20px]">
           <div>SIIIIIII :3</div>
@@ -242,7 +224,6 @@
           <div>20:15 hs</div>
         </div>
       `;
-      // Oculta el contenedor de botones y el botón "No"
       responseButtons.style.display = "none";
       noButton.style.display = "none";
       confetti();
